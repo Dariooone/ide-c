@@ -5,7 +5,7 @@ import Foundation
 //             ${2}        punto vuoto
 //             $0          dove finisce il cursore
 // Le righe dopo la prima prendono da sole il rientro della riga dove sei.
-// Per aggiungerne una: copia una riga, cambia parola, descrizione e testo, poi ./compila.sh
+// Per aggiungerne una: copia una riga, cambia parola, descrizione e testo, poi Script/compila.sh
 
 struct Snippet {
     let parola: String

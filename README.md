@@ -1,58 +1,82 @@
+<div align="center">
+
+<img src="docs/immagini/icona.png" width="128" alt="Icona di IDE C">
+
 # IDE C
 
-App nativa per macOS (Swift + AppKit) per scrivere, compilare ed eseguire programmi in C.
-Niente completamento automatico né suggerimenti: solo **scorciatoie** (scrivi `main` e premi Tab).
+**Scrivi, compila ed esegui programmi in C sul Mac. Senza aiuti, solo scorciatoie.**
 
-## Costruire l'app
-Serve solo `xcode-select --install` (clang e swiftc, niente Xcode).
+Scrivi `main`, premi <kbd>Tab</kbd> e il programma è già impostato. Premi <kbd>⌘</kbd><kbd>R</kbd> e gira.
 
-```
-./compila.sh
-```
+<a href="https://github.com/Dariooone/ide-c/releases/latest/download/IDE-C.dmg"><img src="docs/immagini/scarica.svg" width="264" alt="Scarica per macOS"></a>
 
-Crea `~/Applications/IDE C.app` (fuori dal vault). Dopo ogni modifica ai sorgenti si rilancia lo stesso comando.
+<sub>[Tutte le versioni](https://github.com/Dariooone/ide-c/releases) · [Novità](CHANGELOG.md)</sub>
 
-## GitHub
-Repo privata: https://github.com/Dariooone/ide-c
-I dati di git stanno fuori dal vault, in `~/Documents/Progetti/ide-c.git` (così Syncthing non li copia sul server).
-Per caricare le modifiche:
+<br>
 
-```
-./pubblica.sh "cosa ho cambiato"
-```
+<img src="docs/immagini/copertina.png" alt="La finestra di IDE C: il codice in alto, la console con l'input in verde in basso">
 
-## DMG
-```
-./crea-dmg.sh            # crea ~/Documents/Progetti/IDE-C-<versione>.dmg
-./crea-dmg.sh --carica   # e lo mette nella release su GitHub
-```
-La finestra del DMG ha uno sfondo nero con stelline ad asterisco, un alone di luce dietro le icone e la freccia verso Applicazioni: lo disegna `sfondo-dmg.swift`,
-la disposizione delle icone è in `dmg.py` (le posizioni devono combaciare con lo sfondo). La finestra la prepara
-`dmgbuild` (Python), installato la prima volta in `~/Library/Caches/IDE C/strumenti`.
-La versione si prende da `Info.plist` (`CFBundleShortVersionString`): per una release nuova alzala lì.
-L'app non è firmata da Apple: su un altro Mac, al primo avvio, Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».
+</div>
 
-## File
-- `Sorgenti/main.swift` — avvio, menu, elenco delle scorciatoie (⌘K)
-- `Sorgenti/Snippet.swift` — **le scorciatoie**, divise in sezioni: per aggiungerne una copia una riga e ricompila
-- `Sorgenti/Legenda.swift` — la legenda (⌘K): ricerca, sezioni, schede con anteprima; clic = inserisci
-- `Sorgenti/Editor.swift` — editor: colori del codice, numeri di riga, riga corrente, Tab/Invio/commenti
-- `Sorgenti/Albero.swift` — albero dei file a sinistra: cartelle, operazioni, trascinamento, aggiornamento automatico
-- `Sorgenti/Tema.swift` — i colori (JetBrains «Dark» della New UI e «IntelliJ Light»), segue l'aspetto del Mac
-- `Sorgenti/Finestra.swift` — finestra, barra in alto, console, errori cliccabili
-- `Sorgenti/Esecuzione.swift` — compila con clang ed esegue il programma in un terminale finto (pty)
-- `Sorgenti/FinestraImpostazioni.swift` — Impostazioni (⌘,): aspetto, carattere, standard del C, avvisi, cartella
-- `Sorgenti/Documento.swift` — apri/salva (salvataggio automatico, versioni, schede: li fa macOS)
-- `pubblica.sh` (carica su GitHub), `crea-dmg.sh` (DMG e release), `sfondo-dmg.swift` e `dmg.py` (aspetto del DMG), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
+## Perché
 
-## Albero dei file
-- Mostra la cartella del progetto (di base `~/Documents/Programmi C`, si cambia con ⇧⌘O). ⇧⌘S (o ⌘1) lo mostra o nasconde.
-- Tasto destro: nuovo file C, nuova cartella, rinomina, duplica, copia percorso, mostra nel Finder,
-  apri nel Terminale, sposta nel Cestino (anche ⌘⌫). Doppio clic o Invio apre.
-- Trascinare sposta tra cartelle; trascinare dal Finder copia. I file aperti seguono gli spostamenti.
-- Si aggiorna da solo se cambi i file da fuori (FSEvents).
+Gli IDE completi suggeriscono, completano e correggono mentre scrivi: comodo, ma all'esame non ci sono.
+IDE C non completa niente e non segnala errori mentre scrivi. Ti risparmia solo la parte noiosa:
+`#include`, `int main`, `printf`, `scanf`, i `for`… li scrivi con una parola e <kbd>Tab</kbd>.
 
-## Dove finiscono le cose
-- Programmi nuovi: si propongono in `~/Documents/Programmi C` (si può salvare ovunque).
-- Eseguibili compilati: `~/Library/Caches/IDE C/` (cancellati quando chiudi la finestra).
-- Compilazione: `clang -std=<scelto nelle Impostazioni> [-Wall] [-pedantic] … -lm` (di base C11 con -Wall).
+## Cosa fa
+
+- **69 scorciatoie** in 8 gruppi: inizio del programma, `printf`, `scanf`, array, `if`/`for`/`while`, funzioni, `struct`, `malloc`, file.
+  Dopo <kbd>Tab</kbd> il cursore salta da un punto da riempire al successivo.
+- **Compila ed esegui** con un tasto. Il programma gira nella console in basso e puoi rispondere agli `scanf`;
+  quello che scrivi compare in verde.
+- **Errori cliccabili**: clic sull'errore e vai alla riga, segnata in rosso accanto al numero.
+- **Messaggi in italiano** quando il programma si blocca, per esempio con un *segmentation fault*.
+- **Albero dei file** a sinistra: cartelle, nuovo file, rinomina, sposta trascinando, Cestino.
+- **Colori di CLion** (JetBrains): «Dark» col Mac scuro, «IntelliJ Light» col Mac chiaro.
+- **Chiude da solo** parentesi, virgolette e `/* */`.
+- **Standard del C a scelta**: C89/ANSI, C99, C11, C17, con `-Wall` e `-pedantic` attivabili.
+
+## Installazione
+
+<img src="docs/immagini/installazione.png" width="560" alt="La finestra del DMG: trascina IDE C in Applicazioni">
+
+1. [Scarica **IDE-C.dmg**](https://github.com/Dariooone/ide-c/releases/latest/download/IDE-C.dmg) e aprilo.
+2. Trascina **IDE C** nella cartella **Applicazioni**.
+3. Al primo avvio macOS la blocca perché non viene dall'App Store:
+   apri **Impostazioni di Sistema → Privacy e sicurezza**, scorri in basso e premi **Apri comunque**. Serve una volta sola.
+
+**Requisiti:** macOS 13 Ventura o successivo, Mac Apple Silicon o Intel.
+Serve anche il compilatore di Apple (Command Line Tools): se manca, al primo «Compila» macOS propone di installarlo,
+oppure lo installi da Terminale con `xcode-select --install`.
+
+## Scorciatoie
+
+Scrivi la parola e premi <kbd>Tab</kbd>. <kbd>⌘</kbd><kbd>K</kbd> apre la legenda con tutte le scorciatoie, la ricerca e l'anteprima del codice.
+
+| Parola | Diventa | | Parola | Diventa |
+|---|---|---|---|---|
+| `main` | programma completo con `stdio` e `stdlib` | | `for` | `for (int i = 0; i < n; i++)` |
+| `pf` | `printf("…\n");` | | `format` | doppio `for` per le matrici |
+| `pfd` `pff` `pfs` | `printf` di un int, float, stringa | | `while` `do` | `while`, `do … while` |
+| `pfa` `pfm` | stampa un array, una matrice | | `if` `ife` | `if`, `if … else` |
+| `sf` `sfd` `sff` | `scanf` a scelta, int, float | | `sw` | `switch` con `case` e `default` |
+| `sfl` | legge una riga intera con gli spazi | | `fn` `proto` | funzione, prototipo |
+| `sfeof` | legge numeri finché finisce l'input | | `ts` | `typedef struct` |
+| `ask` | chiede un numero e lo legge | | `mal` | `malloc` con controllo |
+| `askv` | chiede finché il valore va bene | | `fopen` | apre un file con controllo |
+
+### Tasti
+
+| Tasti | Cosa fa | | Tasti | Cosa fa |
+|---|---|---|---|---|
+| <kbd>⌘</kbd><kbd>B</kbd> | compila e mostra gli errori | | <kbd>⌘</kbd><kbd>N</kbd> | nuovo file nella cartella scelta |
+| <kbd>⌘</kbd><kbd>R</kbd> | compila ed esegui | | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd> | mostra o nasconde i file |
+| <kbd>⌘</kbd><kbd>.</kbd> | ferma il programma | | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | sceglie la cartella del progetto |
+| <kbd>⌘</kbd><kbd>D</kbd> | fine input (EOF) | | <kbd>⌘</kbd><kbd>/</kbd> | commenta le righe |
+| <kbd>⌘</kbd><kbd>K</kbd> | legenda delle scorciatoie | | <kbd>⌘</kbd><kbd>,</kbd> | impostazioni |
+
+## Per chi vuole modificarla
+
+IDE C è scritta in Swift con AppKit, senza dipendenze e senza Xcode.
+Come si costruisce, come è organizzato il codice e come si pubblica una versione: [docs/SVILUPPO.md](docs/SVILUPPO.md).
