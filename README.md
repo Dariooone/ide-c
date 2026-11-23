@@ -21,6 +21,14 @@ Per caricare le modifiche:
 ./pubblica.sh "cosa ho cambiato"
 ```
 
+## DMG
+```
+./crea-dmg.sh            # crea ~/Documents/Progetti/IDE-C-<versione>.dmg
+./crea-dmg.sh --carica   # e lo mette nella release su GitHub
+```
+La versione si prende da `Info.plist` (`CFBundleShortVersionString`): per una release nuova alzala lì.
+L'app non è firmata da Apple: su un altro Mac, al primo avvio, Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».
+
 ## File
 - `Sorgenti/main.swift` — avvio, menu, elenco delle scorciatoie (⌘K)
 - `Sorgenti/Snippet.swift` — **le scorciatoie**, divise in sezioni: per aggiungerne una copia una riga e ricompila
@@ -32,7 +40,7 @@ Per caricare le modifiche:
 - `Sorgenti/Esecuzione.swift` — compila con clang ed esegue il programma in un terminale finto (pty)
 - `Sorgenti/FinestraImpostazioni.swift` — Impostazioni (⌘,): aspetto, carattere, standard del C, avvisi, cartella
 - `Sorgenti/Documento.swift` — apri/salva (salvataggio automatico, versioni, schede: li fa macOS)
-- `pubblica.sh` (carica su GitHub), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
+- `pubblica.sh` (carica su GitHub), `crea-dmg.sh` (DMG e release), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
 
 ## Albero dei file
 - Mostra la cartella del progetto (di base `~/Documents/Programmi C`, si cambia con ⇧⌘O). ⇧⌘S (o ⌘1) lo mostra o nasconde.
