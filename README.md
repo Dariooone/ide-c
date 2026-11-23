@@ -26,6 +26,9 @@ Per caricare le modifiche:
 ./crea-dmg.sh            # crea ~/Documents/Progetti/IDE-C-<versione>.dmg
 ./crea-dmg.sh --carica   # e lo mette nella release su GitHub
 ```
+La finestra del DMG ha uno sfondo blu con la freccia verso Applicazioni: lo disegna `sfondo-dmg.swift`,
+la disposizione delle icone è in `dmg.py` (le posizioni devono combaciare con lo sfondo). La finestra la prepara
+`dmgbuild` (Python), installato la prima volta in `~/Library/Caches/IDE C/strumenti`.
 La versione si prende da `Info.plist` (`CFBundleShortVersionString`): per una release nuova alzala lì.
 L'app non è firmata da Apple: su un altro Mac, al primo avvio, Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».
 
@@ -40,7 +43,7 @@ L'app non è firmata da Apple: su un altro Mac, al primo avvio, Impostazioni di 
 - `Sorgenti/Esecuzione.swift` — compila con clang ed esegue il programma in un terminale finto (pty)
 - `Sorgenti/FinestraImpostazioni.swift` — Impostazioni (⌘,): aspetto, carattere, standard del C, avvisi, cartella
 - `Sorgenti/Documento.swift` — apri/salva (salvataggio automatico, versioni, schede: li fa macOS)
-- `pubblica.sh` (carica su GitHub), `crea-dmg.sh` (DMG e release), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
+- `pubblica.sh` (carica su GitHub), `crea-dmg.sh` (DMG e release), `sfondo-dmg.swift` e `dmg.py` (aspetto del DMG), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
 
 ## Albero dei file
 - Mostra la cartella del progetto (di base `~/Documents/Programmi C`, si cambia con ⇧⌘O). ⇧⌘S (o ⌘1) lo mostra o nasconde.
