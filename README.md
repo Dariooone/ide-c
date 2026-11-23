@@ -12,6 +12,15 @@ Serve solo `xcode-select --install` (clang e swiftc, niente Xcode).
 
 Crea `~/Applications/IDE C.app` (fuori dal vault). Dopo ogni modifica ai sorgenti si rilancia lo stesso comando.
 
+## GitHub
+Repo privata: https://github.com/Dariooone/ide-c
+I dati di git stanno fuori dal vault, in `~/Documents/Progetti/ide-c.git` (così Syncthing non li copia sul server).
+Per caricare le modifiche:
+
+```
+./pubblica.sh "cosa ho cambiato"
+```
+
 ## File
 - `Sorgenti/main.swift` — avvio, menu, elenco delle scorciatoie (⌘K)
 - `Sorgenti/Snippet.swift` — **le scorciatoie**, divise in sezioni: per aggiungerne una copia una riga e ricompila
@@ -23,7 +32,7 @@ Crea `~/Applications/IDE C.app` (fuori dal vault). Dopo ogni modifica ai sorgent
 - `Sorgenti/Esecuzione.swift` — compila con clang ed esegue il programma in un terminale finto (pty)
 - `Sorgenti/FinestraImpostazioni.swift` — Impostazioni (⌘,): aspetto, carattere, standard del C, avvisi, cartella
 - `Sorgenti/Documento.swift` — apri/salva (salvataggio automatico, versioni, schede: li fa macOS)
-- `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
+- `pubblica.sh` (carica su GitHub), `Info.plist`, `icona.swift` (disegna l'icona: grigio scuro e forma come il Terminale di macOS, C bianca), `compila.sh`
 
 ## Albero dei file
 - Mostra la cartella del progetto (di base `~/Documents/Programmi C`, si cambia con ⇧⌘O). ⇧⌘S (o ⌘1) lo mostra o nasconde.
