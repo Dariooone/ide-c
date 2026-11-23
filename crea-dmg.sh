@@ -31,9 +31,19 @@ echo "Creo il DMG…"
 mkdir -p "$USCITA"
 cp "$QUI/dmg.py" "$TMP/"
 rm -f "$DMG"
-"$STRUMENTI/bin/dmgbuild" -s "$TMP/dmg.py" -D app="$HOME/Applications/IDE C.app" -D sfondo="$TMP/sfondo.tiff" \
-  "IDE C" "$DMG" 2>&1 >/dev/null | grep -v deprecated || true   # hdiutil avvisa che è «deprecato»: si ignora
-[[ -f "$DMG" ]] || { echo "Errore: il DMG non è stato creato." >&2; exit 1; }
+# hdiutil a volte non riesce a smontare il disco di lavoro («occupato»): si riprova fino a 3 volte
+for prova in 1 2 3; do
+  "$STRUMENTI/bin/dmgbuild" -s "$TMP/dmg.py" -D app="$HOME/Applications/IDE C.app" -D sfondo="$TMP/sfondo.tiff" \
+    "IDE C" "$DMG" >"$TMP/dmgbuild.log" 2>&1 || true
+  [[ -f "$DMG" ]] && break
+  echo "Il DMG non si è creato (tentativo $prova), riprovo…"
+  sleep 3
+done
+if [[ ! -f "$DMG" ]]; then
+  grep -v deprecated "$TMP/dmgbuild.log" >&2
+  echo "Errore: il DMG non è stato creato." >&2
+  exit 1
+fi
 echo "Fatto: $DMG"
 
 if [[ "$1" == "--carica" ]]; then
