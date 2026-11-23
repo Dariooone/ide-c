@@ -1,5 +1,5 @@
 // Disegna l'icona dell'app nello stile delle icone Apple recenti: quadrato «squircle» grigio scuro
-// come le icone di sistema (Terminale), bordo di luce come vetro, C bianca al centro.
+// come le icone di sistema (Terminale), C bianca al centro. Niente bordo di luce (righe bianche sopra e sotto).
 // Uso: swiftc icona.swift -o /tmp/icona && /tmp/icona <cartella>.iconset
 import AppKit
 
@@ -65,17 +65,6 @@ func disegna(_ px: Int) -> Data {
     NSGradient(colors: [colore(0x3D3D3E), colore(0x2A292A), colore(0x1D1D1E), colore(0x161617), colore(0x131314),
                         colore(0x181818)],
                atLocations: [0, 0.10, 0.25, 0.50, 0.80, 1], colorSpace: .sRGB)!.draw(in: corpo, angle: -90)
-    NSGraphicsContext.restoreGraphicsState()
-
-    // bordo di luce come il vetro di macOS: chiaro in alto, più tenue in basso, quasi assente ai lati
-    NSGraphicsContext.saveGraphicsState()
-    let contorno = NSBezierPath()
-    contorno.append(squircle(corpo))
-    contorno.append(squircle(corpo.insetBy(dx: 5 * s, dy: 5 * s)).reversed)
-    contorno.addClip()
-    NSGradient(colors: [NSColor(white: 0.75, alpha: 1), NSColor(white: 0.30, alpha: 1), NSColor(white: 0.10, alpha: 1),
-                        NSColor(white: 0.09, alpha: 1), NSColor(white: 0.22, alpha: 1), NSColor(white: 0.50, alpha: 1)],
-               atLocations: [0, 0.05, 0.16, 0.84, 0.95, 1], colorSpace: .sRGB)!.draw(in: corpo, angle: -90)
     NSGraphicsContext.restoreGraphicsState()
 
     // la C bianca, centrata sul disegno della lettera (non sulla riga del testo)

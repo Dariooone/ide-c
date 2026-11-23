@@ -1,10 +1,9 @@
 import AppKit
 
-// Disegna lo sfondo della finestra del DMG: blu di IDE C, righe di codice appena visibili,
-// un alone sotto le due icone e la freccia «trascina qui».
-// Le icone le mette il Finder; le loro posizioni sono in crea-dmg.sh (APP_X, APP_Y, DEST_X).
-// Il blu ha una luminosità media apposta: le scritte sotto le icone le fa il Finder,
-// bianche se il Mac è scuro e nere se è chiaro, e devono leggersi in tutti e due i casi.
+// Disegna lo sfondo della finestra del DMG: nero, un alone di luce dietro l'icona di IDE C e dietro
+// la cartella Applicazioni, stelline ad asterisco sparse e la freccia «trascina qui».
+// Le icone le mette il Finder; le loro posizioni sono in dmg.py e devono combaciare con `app` e `dest`.
+// Le scritte sotto le icone le fa il Finder: bianche col Mac scuro (si leggono), nere col Mac chiaro.
 // Uso: sfondo-dmg <cartella>  → scrive sfondo.png (640×400) e sfondo@2x.png
 
 let L: CGFloat = 640, A: CGFloat = 400
@@ -13,6 +12,33 @@ let app = CGPoint(x: 180, y: 205), dest = CGPoint(x: 460, y: 205)   // centri de
 func hex(_ v: UInt32, _ a: CGFloat = 1) -> NSColor {
     NSColor(srgbRed: CGFloat((v >> 16) & 0xFF) / 255, green: CGFloat((v >> 8) & 0xFF) / 255,
             blue: CGFloat(v & 0xFF) / 255, alpha: a)
+}
+
+/// Numeri casuali sempre uguali (le stelline restano ferme da un DMG all'altro).
+struct Caso {
+    var s: UInt64 = 0x1DEC0DE
+    mutating func n() -> CGFloat {
+        s = s &* 6364136223846793005 &+ 1442695040888963407
+        return CGFloat(s >> 33) / CGFloat(1 << 31)
+    }
+    mutating func tra(_ a: CGFloat, _ b: CGFloat) -> CGFloat { a + (b - a) * n() }
+}
+
+/// Asterisco: tre bracci che si incrociano (sei punte), con un filo di luce attorno.
+func asterisco(_ c: CGPoint, raggio r: CGFloat, alfa: CGFloat, angolo: CGFloat, cg: CGContext) {
+    let p = NSBezierPath()
+    for k in 0..<3 {
+        let t = angolo + CGFloat(k) * .pi / 3
+        p.move(to: CGPoint(x: c.x - r * cos(t), y: c.y - r * sin(t)))
+        p.line(to: CGPoint(x: c.x + r * cos(t), y: c.y + r * sin(t)))
+    }
+    p.lineWidth = max(1, r * 0.32)
+    p.lineCapStyle = .round
+    cg.saveGState()
+    cg.setShadow(offset: .zero, blur: r * 1.6, color: hex(0xCFE0FF, alfa * 0.8).cgColor)
+    hex(0xFFFFFF, alfa).setStroke()
+    p.stroke()
+    cg.restoreGState()
 }
 
 func disegna(scala: CGFloat, in url: URL) {
@@ -29,53 +55,50 @@ func disegna(scala: CGFloat, in url: URL) {
     cg.scaleBy(x: 1, y: -1)
     let tutto = CGRect(x: 0, y: 0, width: L, height: A)
 
-    // fondo: blu → indaco, in diagonale
-    NSGradient(colors: [hex(0x3E7CF2), hex(0x3A63E4), hex(0x4C55D6)], atLocations: [0, 0.55, 1],
-               colorSpace: .sRGB)!.draw(in: NSBezierPath(rect: tutto), angle: -35)
-    // luce morbida dall'alto
-    NSGradient(colors: [hex(0xFFFFFF, 0.16), hex(0xFFFFFF, 0)], atLocations: [0, 1], colorSpace: .sRGB)!
-        .draw(fromCenter: CGPoint(x: L / 2, y: -40), radius: 0, toCenter: CGPoint(x: L / 2, y: -40), radius: 380,
-              options: [])
+    // fondo nero, appena più chiaro al centro
+    hex(0x050507).setFill()
+    tutto.fill()
+    NSGradient(colors: [hex(0x16171C), hex(0x050507)], atLocations: [0, 1], colorSpace: .sRGB)!
+        .draw(fromCenter: CGPoint(x: L / 2, y: app.y), radius: 0, toCenter: CGPoint(x: L / 2, y: app.y),
+              radius: 380, options: [])
 
-    // righe di codice appena visibili
-    let codice = [
-        "#include <stdio.h>", "", "int main(void) {", "    int n;", "    printf(\"Quanti numeri? \");",
-        "    scanf(\"%d\", &n);", "    for (int i = 0; i < n; i++) {", "        printf(\"%d\\n\", i * i);",
-        "    }", "    return 0;", "}",
-    ]
-    let mono = NSFont(name: "JetBrainsMono-Regular", size: 13) ?? .monospacedSystemFont(ofSize: 13, weight: .regular)
-    let attrCodice: [NSAttributedString.Key: Any] = [.font: mono, .foregroundColor: hex(0xFFFFFF, 0.075)]
-    NSGraphicsContext.saveGraphicsState()
-    cg.beginTransparencyLayer(auxiliaryInfo: nil)
-    let flip = NSAffineTransform()   // il testo va disegnato dritto
-    flip.translateX(by: 0, yBy: A)
-    flip.scaleX(by: 1, yBy: -1)
-    flip.concat()
-    for (i, riga) in (codice + [""] + codice).enumerated() {
-        let y = A - 18 - CGFloat(i) * 19
-        (riga as NSString).draw(at: CGPoint(x: 26, y: y), withAttributes: attrCodice)
-        (riga as NSString).draw(at: CGPoint(x: 360, y: y + 9), withAttributes: attrCodice)
-    }
-    flip.invert()
-    flip.concat()
-    // il codice sfuma via dietro le icone e le loro scritte
-    cg.setBlendMode(.destinationOut)
+    // aloni di luce dietro le due icone: un cuore bianco caldo dentro un bagliore azzurro largo
     for c in [app, dest] {
-        cg.saveGState()
-        cg.translateBy(x: c.x, y: c.y + 14)
-        cg.scaleBy(x: 1.15, y: 1)
-        NSGradient(colors: [hex(0, 1), hex(0, 1), hex(0, 0)], atLocations: [0, 0.6, 1], colorSpace: .sRGB)!
-            .draw(fromCenter: .zero, radius: 0, toCenter: .zero, radius: 125, options: [])
-        cg.restoreGState()
-    }
-    cg.endTransparencyLayer()
-    NSGraphicsContext.restoreGraphicsState()
-
-    // aloni sotto le icone
-    for c in [app, dest] {
-        NSGradient(colors: [hex(0xFFFFFF, 0.20), hex(0xFFFFFF, 0.07), hex(0xFFFFFF, 0)],
-                   atLocations: [0, 0.6, 1], colorSpace: .sRGB)!
+        NSGradient(colors: [hex(0x5B8CFF, 0.42), hex(0x3D63D9, 0.17), hex(0x2A3F99, 0)],
+                   atLocations: [0, 0.5, 1], colorSpace: .sRGB)!
+            .draw(fromCenter: c, radius: 0, toCenter: c, radius: 180, options: [])
+        NSGradient(colors: [hex(0xFFFFFF, 0.62), hex(0xE6EEFF, 0.24), hex(0xFFFFFF, 0)],
+                   atLocations: [0, 0.45, 1], colorSpace: .sRGB)!
             .draw(fromCenter: c, radius: 0, toCenter: c, radius: 108, options: [])
+    }
+
+    // stelline: tante piccole e tenui, qualcuna più grande; mai sopra icone, scritte o titolo
+    var caso = Caso()
+    var messe: [CGPoint] = []
+    func libero(_ p: CGPoint, _ r: CGFloat) -> Bool {
+        if p.y < 105 && abs(p.x - L / 2) < 200 { return false }                 // titolo
+        for c in [app, dest] where abs(p.x - c.x) < 92 && p.y > c.y - 82 && p.y < c.y + 108 { return false }
+        if p.x > 255 && p.x < 385 && abs(p.y - 185) < 40 { return false }        // freccia
+        return !messe.contains { hypot($0.x - p.x, $0.y - p.y) < r + 22 }
+    }
+    var tentativi = 0
+    while messe.count < 46 && tentativi < 4000 {
+        tentativi += 1
+        let p = CGPoint(x: caso.tra(14, L - 14), y: caso.tra(14, A - 14))
+        let grande = messe.count < 7
+        let r = grande ? caso.tra(5, 7.5) : caso.tra(1.8, 3.6)
+        guard libero(p, r) else { continue }
+        messe.append(p)
+        asterisco(p, raggio: r, alfa: grande ? caso.tra(0.75, 0.95) : caso.tra(0.25, 0.6),
+                  angolo: caso.tra(0, .pi / 3), cg: cg)
+    }
+    // puntini lontani
+    for _ in 0..<70 {
+        let p = CGPoint(x: caso.tra(0, L), y: caso.tra(0, A))
+        guard libero(p, 0) else { continue }
+        hex(0xFFFFFF, caso.tra(0.12, 0.4)).setFill()
+        let d = caso.tra(0.8, 1.6)
+        NSBezierPath(ovalIn: CGRect(x: p.x - d / 2, y: p.y - d / 2, width: d, height: d)).fill()
     }
 
     // freccia curva tratteggiata
@@ -87,11 +110,10 @@ func disegna(scala: CGFloat, in url: URL) {
     curva.lineWidth = 4
     curva.lineCapStyle = .round
     curva.setLineDash([0.1, 11], count: 2, phase: 0)
-    hex(0xFFFFFF, 0.92).setStroke()
     cg.saveGState()
-    cg.setShadow(offset: CGSize(width: 0, height: -1), blur: 6, color: hex(0x1A2A80, 0.35).cgColor)
+    cg.setShadow(offset: .zero, blur: 8, color: hex(0x8FB0FF, 0.6).cgColor)
+    hex(0xFFFFFF, 0.92).setStroke()
     curva.stroke()
-    // punta: nella direzione della curva all'arrivo
     let ang = atan2(a.y - ctrl.y, a.x - ctrl.x)
     let punta = NSBezierPath()
     for d in [ang + .pi * 0.78, ang - .pi * 0.78] {
@@ -106,19 +128,18 @@ func disegna(scala: CGFloat, in url: URL) {
 
     // titolo
     NSGraphicsContext.saveGraphicsState()
+    let flip = NSAffineTransform()   // il testo va disegnato dritto
+    flip.translateX(by: 0, yBy: A)
+    flip.scaleX(by: 1, yBy: -1)
     flip.concat()
-    let ombra = NSShadow()
-    ombra.shadowColor = hex(0x10205A, 0.35)
-    ombra.shadowBlurRadius = 6
-    ombra.shadowOffset = NSSize(width: 0, height: -1)
     let centro = NSMutableParagraphStyle()
     centro.alignment = .center
     let titolo = NSAttributedString(string: "Trascina IDE C in Applicazioni", attributes: [
         .font: NSFont.systemFont(ofSize: 20, weight: .semibold), .foregroundColor: NSColor.white,
-        .paragraphStyle: centro, .shadow: ombra])
+        .paragraphStyle: centro])
     titolo.draw(in: CGRect(x: 0, y: A - 66, width: L, height: 28))
     let sotto = NSAttributedString(string: "poi aprila dal Launchpad o con Spotlight", attributes: [
-        .font: NSFont.systemFont(ofSize: 13, weight: .regular), .foregroundColor: hex(0xFFFFFF, 0.78),
+        .font: NSFont.systemFont(ofSize: 13, weight: .regular), .foregroundColor: hex(0xFFFFFF, 0.55),
         .paragraphStyle: centro])
     sotto.draw(in: CGRect(x: 0, y: A - 90, width: L, height: 20))
     NSGraphicsContext.restoreGraphicsState()

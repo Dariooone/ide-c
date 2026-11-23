@@ -26,7 +26,7 @@ Per caricare le modifiche:
 ./crea-dmg.sh            # crea ~/Documents/Progetti/IDE-C-<versione>.dmg
 ./crea-dmg.sh --carica   # e lo mette nella release su GitHub
 ```
-La finestra del DMG ha uno sfondo blu con la freccia verso Applicazioni: lo disegna `sfondo-dmg.swift`,
+La finestra del DMG ha uno sfondo nero con stelline ad asterisco, un alone di luce dietro le icone e la freccia verso Applicazioni: lo disegna `sfondo-dmg.swift`,
 la disposizione delle icone è in `dmg.py` (le posizioni devono combaciare con lo sfondo). La finestra la prepara
 `dmgbuild` (Python), installato la prima volta in `~/Library/Caches/IDE C/strumenti`.
 La versione si prende da `Info.plist` (`CFBundleShortVersionString`): per una release nuova alzala lì.
